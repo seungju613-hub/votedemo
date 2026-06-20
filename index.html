@@ -49,6 +49,24 @@
   .ad-banner .abt{font-weight:700;font-size:13.5px;} .ad-banner .abt b{font-family:'Black Han Sans';font-weight:400;}
   .ad-banner .abgo{margin-left:auto;font-weight:800;font-size:12px;background:rgba(255,255,255,.22);padding:6px 11px;border-radius:99px;}
 
+  /* charge button + packages */
+  .charge-btn{width:calc(100% - 4px);margin:0 2px 14px;display:flex;align-items:center;gap:11px;border:none;cursor:pointer;background:linear-gradient(135deg,#ff4d8d,#b65cff);color:#fff;border-radius:16px;padding:14px 15px;font-family:'Noto Sans KR';box-shadow:0 14px 28px -12px rgba(180,92,255,.7);transition:transform .1s;text-align:left;}
+  .charge-btn:active{transform:scale(.985);}
+  .charge-btn .ci{font-size:21px;flex:none;}
+  .charge-btn .ct{font-weight:800;font-size:14px;line-height:1.2;} .charge-btn .ct small{display:block;font-size:10.5px;font-weight:500;opacity:.9;margin-top:2px;}
+  .charge-btn .cgo{margin-left:auto;font-weight:800;font-size:12px;background:rgba(255,255,255,.22);padding:7px 12px;border-radius:99px;flex:none;}
+  .pack{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:15px;padding:12px 13px;margin-bottom:8px;cursor:pointer;position:relative;transition:transform .1s;}
+  .pack:active{transform:scale(.99);}
+  .pack.rec{border-color:var(--pink);background:var(--grad-soft);}
+  .pack .pemoji{font-size:20px;flex:none;width:24px;text-align:center;}
+  .pack .pinfo{flex:1;min-width:0;}
+  .pack .ppicks{font-family:'Black Han Sans';font-size:15px;color:var(--pink-deep);}
+  .pack .pvotes{font-size:10.5px;color:var(--mute);font-weight:600;margin-top:1px;}
+  .pack .pbonus{display:inline-block;font-size:9.5px;font-weight:800;color:#fff;background:var(--gold);border-radius:99px;padding:1px 7px;margin-left:5px;}
+  .pack .pbonus.zero{background:#d9c7d2;}
+  .pack .pprice{flex:none;background:var(--grad);color:#fff;font-weight:800;font-size:12.5px;border-radius:11px;padding:9px 12px;}
+  .pack .precbadge{position:absolute;top:-8px;left:12px;background:var(--grad);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;}
+
   /* round tabs */
   .tabs{display:flex;gap:7px;margin:0 2px;}
   .tab{flex:1;border:1px solid var(--line);background:var(--bg-soft);color:var(--mute);border-radius:13px;padding:9px 4px;font-weight:800;font-size:13px;cursor:pointer;text-align:center;transition:.16s;}
@@ -211,6 +229,12 @@
     <section class="screen" id="sc-earn">
       <div class="sc-title">픽 모으기<small>다양한 방법으로 픽을 충전하세요</small></div>
 
+      <button class="charge-btn" id="chargeBtn">
+        <span class="ci">💎</span>
+        <span class="ct">픽 충전하기<small>광고 없이 바로 픽을 받아요</small></span>
+        <span class="cgo">충전 →</span>
+      </button>
+
       <div class="card">
         <div class="card-h">
           <div class="card-ic">📅</div>
@@ -279,6 +303,9 @@
 
   <!-- vote sheet -->
   <div class="scrim" id="voteScrim"><div class="sheet" id="voteSheet"></div></div>
+
+  <!-- charge sheet -->
+  <div class="scrim" id="chargeScrim"><div class="sheet" id="chargeSheet"></div></div>
 
   <!-- ad modal -->
   <div class="scrim center" id="adScrim">
@@ -475,6 +502,33 @@
   $('#adEarnBtn').onclick=openAd;
   $('#adBannerBtn').onclick=openAd;
   $$('.mission').forEach(m=>m.onclick=()=>toast('오퍼월 연동 예정 — 앱 출시 후 열려요'));
+
+  /* ---------- 픽 충전 ---------- */
+  const PACKS=[
+    {emoji:'🌱',nm:'스타터',price:1200,picks:16000,bonus:0},
+    {emoji:'💗',nm:'베이직',price:3300,picks:46000,bonus:8},
+    {emoji:'💖',nm:'플러스',price:5500,picks:82000,bonus:17},
+    {emoji:'⭐',nm:'인기',price:11000,picks:180000,bonus:25,rec:true},
+    {emoji:'🔥',nm:'파워',price:22000,picks:380000,bonus:33},
+    {emoji:'💎',nm:'메가',price:55000,picks:1000000,bonus:42},
+    {emoji:'👑',nm:'얼티밋',price:110000,picks:2150000,bonus:50},
+  ];
+  const chargeScrim=$('#chargeScrim');
+  $('#chargeBtn').onclick=openCharge;
+  chargeScrim.onclick=e=>{if(e.target===chargeScrim)chargeScrim.classList.remove('show');};
+  function openCharge(){
+    const rows=PACKS.map((p,i)=>`<div class="pack ${p.rec?'rec':''}" data-i="${i}">${p.rec?'<span class="precbadge">⭐ 추천</span>':''}<span class="pemoji">${p.emoji}</span><div class="pinfo"><div><span class="ppicks">${fmt(p.picks)}픽</span><span class="pbonus ${p.bonus===0?'zero':''}">${p.bonus===0?'기본':'+'+p.bonus+'%'}</span></div><div class="pvotes">≈ ${fmt(Math.floor(p.picks/500))}표 응원 가능</div></div><div class="pprice">${fmt(p.price)}원</div></div>`).join('');
+    $('#chargeSheet').innerHTML=`<h3>픽 충전하기 💎</h3><p>큰 패키지일수록 보너스가 커져요 · 보유 ${fmt(balance)}픽</p>${rows}<button class="opt-close" id="chargeClose">닫기</button><p style="text-align:center;font-size:10.5px;color:var(--mute);margin:11px 0 0;line-height:1.5">＊ 데모예요. 실제 결제는 앱 출시 후 스토어 결제에 연결돼요.</p>`;
+    $('#chargeSheet').querySelectorAll('.pack').forEach(el=>el.onclick=()=>buyPack(+el.dataset.i));
+    $('#chargeClose').onclick=()=>chargeScrim.classList.remove('show');
+    chargeScrim.classList.add('show');
+  }
+  function buyPack(i){
+    const p=PACKS[i];balance+=p.picks;renderBalance();updateMe();
+    chargeScrim.classList.remove('show');
+    balEl.classList.remove('bump');void balEl.offsetWidth;balEl.classList.add('bump');
+    toast(`💎 ${fmt(p.picks)}픽 충전 완료!`);
+  }
 
   /* ---------- 내정보 ---------- */
   function updateMe(){
