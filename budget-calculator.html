@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>마이픽 예산 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--pink:#ff4d8d;--pink-deep:#e63a78;--grad:linear-gradient(135deg,#ff4d8d,#ff85c0);--ink:#2c1622;--mute:#a98ba0;--line:#ffe1ec;--bg-soft:#fff5f9;--green:#16a34a;--red:#e11d48;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Noto Sans KR',system-ui,sans-serif;background:#f4e9f0;color:var(--ink);display:flex;justify-content:center;padding:22px 12px;}
+  .wrap{width:100%;max-width:440px;background:#fff;border-radius:26px;box-shadow:0 36px 80px -30px rgba(120,40,80,.45);overflow:hidden;}
+  .head{background:var(--grad);color:#fff;padding:20px 22px;}
+  .head h1{margin:0;font-family:'Black Han Sans';font-size:22px;font-weight:400;}
+  .head p{margin:5px 0 0;font-size:12.5px;opacity:.95;}
+  .body{padding:18px 20px 22px;}
+
+  .field{margin-bottom:17px;}
+  .field .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .field .lab .nm{font-size:13px;font-weight:800;}
+  .field .lab .val{font-family:'Black Han Sans';font-size:16px;color:var(--pink-deep);}
+  .field .lab .val small{font-family:'Noto Sans KR';font-size:11px;color:var(--mute);font-weight:700;}
+  input[type=range]{width:100%;-webkit-appearance:none;height:7px;border-radius:99px;background:#ffe1ec;outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--pink);cursor:pointer;box-shadow:0 4px 10px -2px rgba(255,77,141,.7);border:3px solid #fff;}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--pink);cursor:pointer;border:3px solid #fff;}
+  .hint{font-size:10.5px;color:var(--mute);margin-top:6px;line-height:1.4;}
+
+  .result{background:var(--bg-soft);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:6px;}
+  .rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;}
+  .rrow + .rrow{border-top:1px dashed var(--line);}
+  .rrow .rk{font-size:12.5px;color:var(--mute);font-weight:700;}
+  .rrow .rv{font-family:'Black Han Sans';font-size:18px;}
+  .rv.pink{color:var(--pink-deep);}
+  .bar{height:12px;border-radius:99px;background:#f0e2ea;overflow:hidden;margin:12px 0 4px;position:relative;}
+  .bar>i{display:block;height:100%;background:var(--grad);width:0;transition:width .3s;}
+  .bar-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);font-weight:700;}
+
+  .verdict{margin-top:14px;border-radius:14px;padding:13px 15px;font-weight:800;font-size:13.5px;line-height:1.5;text-align:center;}
+  .verdict.ok{background:#e8f8ef;color:var(--green);} .verdict.no{background:#ffe8ee;color:var(--red);}
+  .verdict b{font-family:'Black Han Sans';font-weight:400;}
+
+  .note{font-size:10.5px;color:var(--mute);margin-top:14px;line-height:1.6;background:var(--bg-soft);border-radius:12px;padding:11px 13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>마이픽 예산 계산기</h1>
+    <p>광고수익으로 전광판 상금을 충당할 수 있는지 계산해요</p>
+  </div>
+  <div class="body">
+
+    <div class="field">
+      <div class="lab"><span class="nm">① 매일 접속하는 활성 팬 수</span><span class="val" id="fansV">2,300<small>명</small></span></div>
+      <input type="range" id="fans" min="200" max="10000" step="100" value="2300">
+      <div class="hint">＊ 가입자 전체가 아니라 <b>매일 들어오는</b> 사람 기준. 가입자는 보통 이 수의 3~4배가 필요해요.</div>
+    </div>
+
+    <div class="field">
+      <div class="lab"><span class="nm">② 1인당 하루 광고 시청 횟수</span><span class="val" id="viewsV">2<small>회</small></span></div>
+      <input type="range" id="views" min="1" max="10" step="1" value="2">
+    </div>
+
+    <div class="field">
+      <div class="lab"><span class="nm">③ 광고 1회당 수익</span><span class="val" id="revV">11<small>원</small></span></div>
+      <input type="range" id="rev" min="3" max="25" step="1" value="11">
+      <div class="hint">보수적 7원 · 보통 11원 · 낙관 17원 (보상형 영상 기준). 오퍼월·결제는 별도 윗물이에요.</div>
+    </div>
+
+    <div class="field">
+      <div class="lab"><span class="nm">④ 월 상금(전광판) 비용</span><span class="val" id="prizeV">150<small>만원</small></span></div>
+      <input type="range" id="prize" min="50" max="500" step="10" value="150">
+      <div class="hint">강남역 버스정류장 1주일 ≈ 150만원 기준. 대형 스크린은 더 올려보세요.</div>
+    </div>
+
+    <div class="result">
+      <div class="rrow"><span class="rk">월 광고 수익 (예상)</span><span class="rv pink" id="outRev">0원</span></div>
+      <div class="rrow"><span class="rk">월 상금 비용</span><span class="rv" id="outPrize">0원</span></div>
+      <div class="rrow"><span class="rk">월 손익 (수익 − 상금)</span><span class="rv" id="outNet">0원</span></div>
+
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="bar-lbl"><span>광고수익</span><span id="barPct">0%</span><span>상금</span></div>
+
+      <div class="rrow" style="margin-top:6px"><span class="rk">상금 충당에 필요한 활성 팬</span><span class="rv" id="outBreak">0명</span></div>
+    </div>
+
+    <div class="verdict" id="verdict"></div>
+
+    <div class="note">이 계산은 <b>보상형 영상 광고만</b> 따진 '본전' 추정이에요. 실제로는 ⑴ 광고를 끝까지 안 보거나 재고가 빌 수 있어 조금 낮아지고, ⑵ 오퍼월(앱 설치·쇼핑)과 픽 직접 결제가 더해지면 훨씬 높아져요. ⑶ 인건비·세금·이익은 빠져 있으니, 실제 목표는 '본전'보다 위로 잡으세요.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const won=n=>Math.round(n).toLocaleString()+'원';
+  const els={fans:$('#fans'),views:$('#views'),rev:$('#rev'),prize:$('#prize')};
+  function calc(){
+    const F=+els.fans.value, V=+els.views.value, R=+els.rev.value, P=+els.prize.value*10000;
+    $('#fansV').innerHTML=F.toLocaleString()+'<small>명</small>';
+    $('#viewsV').innerHTML=V+'<small>회</small>';
+    $('#revV').innerHTML=R+'<small>원</small>';
+    $('#prizeV').innerHTML=(P/10000).toLocaleString()+'<small>만원</small>';
+
+    const revenue=F*V*30*R;
+    const net=revenue-P;
+    const breakEven=Math.ceil(P/(V*30*R));
+
+    $('#outRev').textContent=won(revenue);
+    $('#outPrize').textContent=won(P);
+    const netEl=$('#outNet');
+    netEl.textContent=(net>=0?'+':'')+won(net);
+    netEl.style.color=net>=0?'var(--green)':'var(--red)';
+
+    const pct=Math.min(100,Math.round(revenue/P*100));
+    $('#barFill').style.width=Math.min(100,revenue/P*100)+'%';
+    $('#barPct').textContent=Math.round(revenue/P*100)+'%';
+    $('#outBreak').textContent=breakEven.toLocaleString()+'명';
+
+    const v=$('#verdict');
+    if(net>=0){v.className='verdict ok';v.innerHTML=`✅ 충당 가능! 매달 <b>${won(net)}</b> 남아요.<br>활성 팬 <b>${breakEven.toLocaleString()}명</b>이면 본전이에요.`;}
+    else{v.className='verdict no';v.innerHTML=`⚠️ 아직 <b>${won(-net)}</b> 부족해요.<br>활성 팬이 <b>${breakEven.toLocaleString()}명</b>은 돼야 충당돼요.`;}
+  }
+  Object.values(els).forEach(e=>e.addEventListener('input',calc));
+  calc();
+})();
+</script>
+</body>
+</html>
