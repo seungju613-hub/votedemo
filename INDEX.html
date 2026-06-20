@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>마이픽 MYPICK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#fff5f9; --bg-soft2:#fff0f6;
+    --pink:#ff4d8d; --pink-2:#ff7eb3; --pink-deep:#e63a78;
+    --grad:linear-gradient(135deg,#ff4d8d 0%,#ff85c0 100%);
+    --grad-soft:linear-gradient(135deg,#fff0f6,#ffe7f1);
+    --ink:#2c1622; --mute:#a98ba0; --mute-2:#c9aebf;
+    --line:#ffe1ec; --gold:#ffb13d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Noto Sans KR',system-ui,sans-serif;background:#f4e9f0;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:22px 12px;color:var(--ink);}
+  .phone{width:100%;max-width:392px;height:clamp(620px,90vh,840px);background:var(--bg);border-radius:34px;box-shadow:0 40px 90px -28px rgba(120,40,80,.45);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+
+  /* app bar */
+  .appbar{padding:16px 18px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:var(--bg);z-index:5;}
+  .appbar .brandwrap{flex:1;min-width:0;}
+  .logo{font-family:'Black Han Sans',sans-serif;font-size:24px;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .tagline{font-size:11px;color:var(--pink-deep);font-weight:700;margin-top:3px;}
+  .bal{display:flex;align-items:center;gap:7px;background:var(--grad-soft);border:1px solid var(--line);border-radius:14px;padding:8px 12px;flex:none;}
+  .bal .hh{font-size:15px;}
+  .bal .v{font-family:'Black Han Sans';font-size:17px;line-height:1;color:var(--pink-deep);}
+  .bal .u{font-size:11px;color:var(--mute);font-weight:700;margin-left:1px;}
+  .bal.bump{animation:bump .5s cubic-bezier(.2,.8,.2,1);}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+  .bal.lack{animation:shake .45s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+
+  /* content */
+  .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+  .screen{display:none;padding:14px 14px 22px;}
+  .screen.on{display:block;}
+  .sc-title{font-size:18px;font-weight:900;margin:2px 4px 12px;}
+  .sc-title small{display:block;font-size:12px;color:var(--mute);font-weight:600;margin-top:2px;}
+
+  /* ad banner on ranking */
+  .ad-banner{width:calc(100% - 4px);margin:0 2px 11px;display:flex;align-items:center;gap:10px;border:none;cursor:pointer;background:var(--grad);color:#fff;border-radius:15px;padding:12px 14px;font-family:'Noto Sans KR';box-shadow:0 12px 24px -12px rgba(255,77,141,.8);transition:transform .1s;}
+  .ad-banner:active{transform:scale(.985);}
+  .ad-banner .abi{font-size:18px;}
+  .ad-banner .abt{font-weight:700;font-size:13.5px;} .ad-banner .abt b{font-family:'Black Han Sans';font-weight:400;}
+  .ad-banner .abgo{margin-left:auto;font-weight:800;font-size:12px;background:rgba(255,255,255,.22);padding:6px 11px;border-radius:99px;}
+
+  /* charge button + packages */
+  .charge-btn{width:calc(100% - 4px);margin:0 2px 14px;display:flex;align-items:center;gap:11px;border:none;cursor:pointer;background:linear-gradient(135deg,#ff4d8d,#b65cff);color:#fff;border-radius:16px;padding:14px 15px;font-family:'Noto Sans KR';box-shadow:0 14px 28px -12px rgba(180,92,255,.7);transition:transform .1s;text-align:left;}
+  .charge-btn:active{transform:scale(.985);}
+  .charge-btn .ci{font-size:21px;flex:none;}
+  .charge-btn .ct{font-weight:800;font-size:14px;line-height:1.2;} .charge-btn .ct small{display:block;font-size:10.5px;font-weight:500;opacity:.9;margin-top:2px;}
+  .charge-btn .cgo{margin-left:auto;font-weight:800;font-size:12px;background:rgba(255,255,255,.22);padding:7px 12px;border-radius:99px;flex:none;}
+  .pack{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:15px;padding:12px 13px;margin-bottom:8px;cursor:pointer;position:relative;transition:transform .1s;}
+  .pack:active{transform:scale(.99);}
+  .pack.rec{border-color:var(--pink);background:var(--grad-soft);}
+  .pack .pemoji{font-size:20px;flex:none;width:24px;text-align:center;}
+  .pack .pinfo{flex:1;min-width:0;}
+  .pack .ppicks{font-family:'Black Han Sans';font-size:15px;color:var(--pink-deep);}
+  .pack .pvotes{font-size:10.5px;color:var(--mute);font-weight:600;margin-top:1px;}
+  .pack .pbonus{display:inline-block;font-size:9.5px;font-weight:800;color:#fff;background:var(--gold);border-radius:99px;padding:1px 7px;margin-left:5px;}
+  .pack .pbonus.zero{background:#d9c7d2;}
+  .pack .pprice{flex:none;background:var(--grad);color:#fff;font-weight:800;font-size:12.5px;border-radius:11px;padding:9px 12px;}
+  .pack .precbadge{position:absolute;top:-8px;left:12px;background:var(--grad);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;}
+
+  /* round tabs */
+  .tabs{display:flex;gap:7px;margin:0 2px;}
+  .tab{flex:1;border:1px solid var(--line);background:var(--bg-soft);color:var(--mute);border-radius:13px;padding:9px 4px;font-weight:800;font-size:13px;cursor:pointer;text-align:center;transition:.16s;}
+  .tab .sub{display:block;font-size:9.5px;font-weight:600;margin-top:2px;}
+  .tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 8px 18px -8px rgba(255,77,141,.6);}
+
+  .round-head{margin:11px 2px 0;background:var(--bg-soft);border:1px solid var(--line);border-radius:16px;padding:12px 13px;}
+  .status-row{display:flex;align-items:center;gap:8px;}
+  .chip{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;}
+  .chip.live{background:#ffe3ee;color:var(--pink-deep);}
+  .chip.soon{background:#f1e7ee;color:var(--mute);}
+  .dday{margin-left:auto;font-family:'Black Han Sans';font-size:15px;color:var(--pink);}
+  .timeline{display:flex;align-items:center;gap:5px;margin-top:11px;}
+  .ph{flex:1;text-align:center;font-size:10px;color:var(--mute);line-height:1.3;}
+  .ph .t{display:block;font-weight:800;}
+  .ph.on .t{color:var(--pink-deep);} .ph .d{font-size:9.5px;}
+  .ph-ar{color:var(--mute-2);font-size:11px;}
+
+  .prize-tag{margin:11px 2px 6px;padding:11px 13px;border-radius:13px;background:var(--grad-soft);border:1px solid #ffd4e6;font-size:11.5px;color:var(--pink-deep);font-weight:700;line-height:1.45;}
+  .prize-tag b{color:var(--pink-deep);}
+
+  .list{display:flex;flex-direction:column;position:relative;margin-top:4px;}
+  .row{display:flex;align-items:center;gap:11px;padding:10px 8px;border-radius:18px;border:1px solid transparent;will-change:transform;}
+  .row + .row{margin-top:4px;}
+  .rank{width:22px;text-align:center;flex:none;font-family:'Black Han Sans';font-size:17px;color:var(--mute-2);}
+  .avatar{width:44px;height:44px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans';font-size:17px;color:#fff;background-size:cover;background-position:center;}
+  .who{flex:1;min-width:0;}
+  .who .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .crown{display:none;font-size:12px;margin-left:3px;}
+  .who .gp{font-size:11px;color:var(--mute);margin-top:1px;}
+  .who .mine{display:none;font-size:10px;color:var(--pink);font-weight:800;margin-top:2px;}
+  .votes{flex:none;text-align:right;min-width:72px;}
+  .votes .n{font-family:'Black Han Sans';font-size:15px;line-height:1;color:var(--ink);}
+  .votes .u{font-size:10px;color:var(--mute);}
+  .votes .n.tick{animation:tick .5s cubic-bezier(.2,.8,.2,1);}
+  @keyframes tick{0%{transform:scale(1)}45%{transform:scale(1.18);color:var(--pink)}100%{transform:scale(1)}}
+  .heart-btn{flex:none;border:none;background:var(--grad);color:#fff;border-radius:13px;padding:9px 13px;font-family:'Noto Sans KR';font-weight:800;font-size:12px;cursor:pointer;transition:transform .1s;box-shadow:0 8px 16px -8px rgba(255,77,141,.7);}
+  .heart-btn:active{transform:scale(.93);}
+  .row.top{background:var(--grad-soft);border-color:#ffcfe2;box-shadow:0 10px 26px -16px rgba(255,77,141,.8);}
+  .row.top .rank{color:var(--pink);} .row.top .crown{display:inline-block;}
+
+  /* cards (earn / me / bias) */
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:15px;margin:0 2px 11px;box-shadow:0 10px 26px -18px rgba(255,77,141,.5);}
+  .card.soft{background:var(--bg-soft);}
+  .card-h{display:flex;align-items:center;gap:9px;}
+  .card-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;background:var(--grad-soft);flex:none;}
+  .card-t{font-weight:800;font-size:14px;} .card-d{font-size:11.5px;color:var(--mute);margin-top:2px;line-height:1.4;}
+  .reward{margin-left:auto;font-family:'Black Han Sans';font-size:15px;color:var(--pink-deep);flex:none;}
+  .cta{width:100%;border:none;background:var(--grad);color:#fff;font-family:'Noto Sans KR';font-weight:800;font-size:14px;border-radius:13px;padding:12px;margin-top:12px;cursor:pointer;transition:transform .1s;box-shadow:0 10px 20px -10px rgba(255,77,141,.7);}
+  .cta:active{transform:scale(.98);}
+  .cta.ghost{background:var(--bg-soft);color:var(--pink-deep);border:1px solid var(--line);box-shadow:none;}
+  .cta:disabled{background:#f0e6ec;color:var(--mute-2);box-shadow:none;cursor:default;}
+
+  .mission{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px dashed var(--line);}
+  .mission:last-child{border-bottom:none;}
+  .mission .mi{width:34px;height:34px;border-radius:10px;background:var(--bg-soft2);display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
+  .mission .mt{flex:1;font-size:12.5px;font-weight:700;}
+  .mission .mt small{display:block;font-size:10.5px;color:var(--mute);font-weight:500;margin-top:1px;}
+  .mission .mr{font-family:'Black Han Sans';font-size:13px;color:var(--pink-deep);flex:none;}
+  .note{font-size:10.5px;color:var(--mute);margin:8px 4px 0;line-height:1.5;}
+
+  /* bias picker */
+  .pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 2px;}
+  .pick{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer;transition:.12s;}
+  .pick:active{transform:scale(.97);} .pick.sel{border-color:var(--pink);background:var(--grad-soft);}
+  .pick .pa{width:34px;height:34px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans';color:#fff;font-size:14px;background-size:cover;background-position:center;}
+  .pick .pn{font-size:12px;font-weight:800;} .pick .pg{font-size:10px;color:var(--mute);}
+  .bias-hero{margin:0 2px 12px;border-radius:20px;overflow:hidden;background:var(--grad);color:#fff;padding:18px;position:relative;}
+  .bias-hero .bphoto{width:78px;height:78px;border-radius:20px;background:rgba(255,255,255,.25);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans';font-size:30px;border:2px solid rgba(255,255,255,.6);}
+  .bias-hero .bnm{font-size:22px;font-weight:900;margin-top:12px;}
+  .bias-hero .bgp{font-size:12px;opacity:.92;font-weight:700;}
+  .bias-hero .brow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .pillinfo{background:rgba(255,255,255,.22);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;}
+  .bias-hero .bbtns{display:flex;gap:8px;margin-top:14px;}
+  .bbtn{flex:1;border:none;border-radius:11px;padding:10px;font-family:'Noto Sans KR';font-weight:800;font-size:12px;cursor:pointer;background:#fff;color:var(--pink-deep);}
+  .bbtn.outline{background:rgba(255,255,255,.18);color:#fff;}
+
+  /* info rows */
+  .inforow{display:flex;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid var(--line);}
+  .inforow:last-child{border-bottom:none;}
+  .inforow .il{font-size:12.5px;color:var(--mute);font-weight:700;width:84px;flex:none;}
+  .inforow .iv{font-size:13.5px;font-weight:700;flex:1;}
+  .nick-input{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-family:'Noto Sans KR';font-size:13px;color:var(--ink);background:var(--bg-soft);}
+  .mini-save{border:none;background:var(--grad);color:#fff;font-weight:800;border-radius:10px;padding:9px 13px;font-size:12px;cursor:pointer;flex:none;}
+
+  /* bottom nav */
+  .nav{display:flex;border-top:1px solid var(--line);background:var(--bg);flex:none;}
+  .nav button{flex:1;border:none;background:none;padding:9px 2px 11px;cursor:pointer;color:var(--mute-2);display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Sans KR';font-weight:700;font-size:10.5px;}
+  .nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+  .nav button.on{color:var(--pink);}
+  .nav button.on .navic{background:var(--grad-soft);}
+  .navic{width:42px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;}
+
+  /* modals */
+  .scrim{position:absolute;inset:0;background:rgba(60,22,34,.45);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:30;}
+  .scrim.show{display:flex;}
+  .sheet{width:100%;background:#fff;border-radius:24px 24px 0 0;padding:20px 18px 24px;animation:rise .25s ease;}
+  @keyframes rise{from{transform:translateY(30px);opacity:.6}to{transform:translateY(0);opacity:1}}
+  .sheet h3{margin:0 0 3px;font-size:17px;font-weight:900;}
+  .sheet p{margin:0 0 14px;font-size:12px;color:var(--mute);}
+  .opt{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:15px;padding:13px 14px;margin-bottom:9px;cursor:pointer;transition:.12s;}
+  .opt:active{transform:scale(.98);}
+  .opt .ov{font-family:'Black Han Sans';font-size:18px;color:var(--pink-deep);min-width:58px;}
+  .opt .ovs{font-size:10px;color:var(--mute);font-weight:600;display:block;}
+  .opt .op{margin-left:auto;font-size:13px;font-weight:800;color:var(--ink);}
+  .opt .op small{color:var(--mute);font-weight:600;}
+  .opt.disabled{opacity:.4;pointer-events:none;}
+  .opt.best{border-color:var(--pink);background:var(--grad-soft);}
+  .opt-close{width:100%;border:none;background:var(--bg-soft);color:var(--mute);font-weight:800;border-radius:12px;padding:11px;margin-top:5px;cursor:pointer;font-family:'Noto Sans KR';}
+
+  /* ad modal centered */
+  .scrim.center{align-items:center;padding:28px;}
+  .ad-card{width:100%;background:#fff;border-radius:22px;padding:24px;text-align:center;}
+  .ad-card .tv{font-size:34px;} .ad-card h3{margin:8px 0 2px;font-size:16px;} .ad-card p{margin:0;font-size:12px;color:var(--mute);}
+  .ad-prog{height:8px;border-radius:99px;background:#f1e2ea;margin:18px 0 6px;overflow:hidden;}
+  .ad-prog>i{display:block;height:100%;width:0;background:var(--grad);}
+  .ad-count{font-family:'Black Han Sans';font-size:13px;color:var(--mute);}
+  .ad-done{background:var(--grad);border:none;color:#fff;font-weight:800;border-radius:14px;padding:12px 18px;font-size:14px;margin-top:14px;cursor:pointer;display:none;font-family:'Noto Sans KR';}
+
+  .toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;font-weight:800;font-size:13px;padding:11px 18px;border-radius:99px;box-shadow:0 16px 30px -10px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.25s;z-index:40;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .floaty{position:absolute;font-family:'Black Han Sans';font-size:15px;color:var(--pink);pointer-events:none;z-index:35;animation:fl .85s ease forwards;}
+  @keyframes fl{0%{opacity:0;transform:translateY(0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translateY(-30px) scale(1.15)}}
+
+  :focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="appbar">
+    <div class="brandwrap">
+      <div class="logo">마이픽</div>
+      <div class="tagline">내 최애를 위한 마이픽! 💗</div>
+    </div>
+    <div class="bal" id="bal"><span class="hh">💗</span><span class="v" id="balVal">0</span><span class="u">픽</span></div>
+  </div>
+
+  <div class="content">
+    <!-- ===== 랭킹 ===== -->
+    <section class="screen on" id="sc-rank">
+      <button class="ad-banner" id="adBannerBtn">
+        <span class="abi">📺</span>
+        <span class="abt">광고 보고 <b>10,000픽</b> 받기</span>
+        <span class="abgo">받기 →</span>
+      </button>
+      <div class="tabs" id="tabs"></div>
+      <div class="round-head" id="roundHead"></div>
+      <div class="prize-tag" id="prizeTag"></div>
+      <div class="list" id="list"></div>
+    </section>
+
+    <!-- ===== 마이최애 ===== -->
+    <section class="screen" id="sc-bias">
+      <div class="sc-title">마이최애<small>내 최애를 골라 응원하세요</small></div>
+      <div id="biasBody"></div>
+    </section>
+
+    <!-- ===== 픽 모으기 ===== -->
+    <section class="screen" id="sc-earn">
+      <div class="sc-title">픽 모으기<small>다양한 방법으로 픽을 충전하세요</small></div>
+
+      <button class="charge-btn" id="chargeBtn">
+        <span class="ci">💎</span>
+        <span class="ct">픽 충전하기<small>광고 없이 바로 픽을 받아요</small></span>
+        <span class="cgo">충전 →</span>
+      </button>
+
+      <div class="card">
+        <div class="card-h">
+          <div class="card-ic">📅</div>
+          <div><div class="card-t">출석체크</div><div class="card-d">매일 출석하고 픽을 받아요</div></div>
+          <div class="reward">+1,000</div>
+        </div>
+        <button class="cta" id="attBtn">오늘 출석하고 1,000픽 받기</button>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <div class="card-ic">📺</div>
+          <div><div class="card-t">광고 보고 픽 받기</div><div class="card-d">영상 광고를 끝까지 보면 적립</div></div>
+          <div class="reward">+10,000</div>
+        </div>
+        <button class="cta" id="adEarnBtn">광고 보고 10,000픽 받기</button>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <div class="card-ic">🎁</div>
+          <div><div class="card-t">미션하고 픽 받기</div><div class="card-d">앱 설치·쇼핑·가입으로 픽 충전</div></div>
+        </div>
+        <div style="margin-top:6px">
+          <div class="mission" data-m="앱 설치"><div class="mi">📲</div><div class="mt">앱 설치하고 픽 받기<small>추천 앱 설치 후 실행</small></div><div class="mr">+5,000</div></div>
+          <div class="mission" data-m="쇼핑 적립"><div class="mi">🛍️</div><div class="mt">쇼핑하고 픽 받기<small>제휴몰에서 구매 시 적립</small></div><div class="mr">+30,000</div></div>
+          <div class="mission" data-m="회원가입"><div class="mi">✍️</div><div class="mt">가입하고 픽 받기<small>제휴 서비스 무료 가입</small></div><div class="mr">+8,000</div></div>
+          <div class="mission" data-m="친구 초대"><div class="mi">👯</div><div class="mt">친구 초대하고 픽 받기<small>초대 코드로 친구 가입 시</small></div><div class="mr">+3,000</div></div>
+        </div>
+        <p class="note">＊ 이 영역은 ‘오퍼월’ 광고로 채워져요. 앱 출시 후 애드팝콘·버즈빌·핀크럭스 같은 오퍼월 서비스를 연동하면 실제 미션과 보상이 들어옵니다. (지금은 자리만 잡아둔 상태예요)</p>
+      </div>
+    </section>
+
+    <!-- ===== 내정보 ===== -->
+    <section class="screen" id="sc-me">
+      <div class="sc-title">내정보<small>계정과 픽을 관리하세요</small></div>
+
+      <div class="card soft">
+        <div class="card-h">
+          <div class="card-ic">🐤</div>
+          <div><div class="card-t" id="meHello">아미보라 님</div><div class="card-d">카카오로 로그인됨 · 데모 계정</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="inforow"><div class="il">닉네임</div>
+          <input class="nick-input" id="nickInput" value="아미보라" maxlength="12" />
+          <button class="mini-save" id="nickSave">저장</button>
+        </div>
+        <div class="inforow"><div class="il">보유 픽</div><div class="iv" id="mePick" style="color:var(--pink-deep);font-family:'Black Han Sans'">0 픽</div></div>
+        <div class="inforow"><div class="il">내 최애</div><div class="iv" id="meBias">아직 선택 안 함</div></div>
+        <div class="inforow"><div class="il">내 투표</div><div class="iv" id="meVotes">0표</div></div>
+      </div>
+
+      <button class="cta ghost" id="logoutBtn">로그아웃</button>
+    </section>
+  </div>
+
+  <!-- bottom nav -->
+  <nav class="nav" id="nav">
+    <button data-sc="rank" class="on"><span class="navic"><svg viewBox="0 0 24 24"><path d="M5 21V9M12 21V4M19 21v-7"/></svg></span>랭킹</button>
+    <button data-sc="bias"><span class="navic"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></span>마이최애</button>
+    <button data-sc="earn"><span class="navic"><svg viewBox="0 0 24 24"><path d="M20 7H4v5h16V7zM12 7v13M12 7s-1.5-4-4-4-2 3 0 3.5M12 7s1.5-4 4-4 2 3 0 3.5M5 12v9h14v-9"/></svg></span>픽 모으기</button>
+    <button data-sc="me"><span class="navic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></span>내정보</button>
+  </nav>
+
+  <!-- vote sheet -->
+  <div class="scrim" id="voteScrim"><div class="sheet" id="voteSheet"></div></div>
+
+  <!-- charge sheet -->
+  <div class="scrim" id="chargeScrim"><div class="sheet" id="chargeSheet"></div></div>
+
+  <!-- ad modal -->
+  <div class="scrim center" id="adScrim">
+    <div class="ad-card">
+      <div class="tv">📺</div>
+      <h3 id="adTitle">광고 시청 중…</h3>
+      <p id="adSub">끝까지 보면 10,000픽이 적립돼요</p>
+      <div class="ad-prog"><i id="adFill"></i></div>
+      <div class="ad-count" id="adCount">3초</div>
+      <button class="ad-done" id="adDone">+10,000픽 받기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const AD_REWARD=10000, ATT_REWARD=1000;
+  const VOTE_OPTS=[{v:1,p:500},{v:5,p:2500},{v:10,p:5000},{v:30,p:15000},{v:50,p:25000}];
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  const rounds={
+    '9':{label:'9월',sub:'생일 라운드',status:'live',statusTxt:'투표 진행중',dday:'D-26',
+      timeline:[['투표 진행','7/1–8/15',true],['1위 발표','8/15',false],['생일 광고','9월',false]],
+      idols:[
+        {id:'s1',nm:'차은성',gp:'NOVA',bday:'9월 7일',bio:'무대 위 카리스마, 팀의 메인보컬',votes:3241880,c:['#ff4d8d','#ff8cc6']},
+        {id:'s2',nm:'유시현',gp:'NOVA',bday:'9월 14일',bio:'다정한 리더, 작사 작곡까지',votes:2980455,c:['#a855f7','#ec4899']},
+        {id:'s3',nm:'강하루',gp:'LUMINA',bday:'9월 9일',bio:'청량한 비주얼 센터',votes:2655120,c:['#06b6d4','#3b82f6']},
+        {id:'s4',nm:'문재이',gp:'ECLIPSE',bday:'9월 21일',bio:'파워풀한 메인댄서',votes:2210733,c:['#f59e0b','#ef4444']},
+        {id:'s5',nm:'한세빈',gp:'LUMINA',bday:'9월 3일',bio:'분위기 메이커 막내',votes:1870201,c:['#10b981','#14b8a6']},
+        {id:'s6',nm:'도이안',gp:'ECLIPSE',bday:'9월 28일',bio:'저음 매력의 래퍼',votes:1402667,c:['#8b5cf6','#d946ef']},
+      ]},
+    '10':{label:'10월',sub:'생일 라운드',status:'soon',statusTxt:'오픈 예정',dday:'예정',
+      timeline:[['투표 진행','8/1–9/15',false],['1위 발표','9/15',false],['생일 광고','10월',false]],
+      idols:[
+        {id:'o1',nm:'백서진',gp:'VELLO',bday:'10월 5일',bio:'팀의 비주얼 에이스',votes:2910300,c:['#f43f5e','#fb7185']},
+        {id:'o2',nm:'임도하',gp:'NOVA',bday:'10월 19일',bio:'안정적인 리드보컬',votes:2540118,c:['#6366f1','#8b5cf6']},
+        {id:'o3',nm:'윤가람',gp:'LUMINA',bday:'10월 11일',bio:'에너지 넘치는 댄서',votes:2230900,c:['#0ea5e9','#22d3ee']},
+        {id:'o4',nm:'서온유',gp:'VELLO',bday:'10월 2일',bio:'섬세한 감성의 보컬',votes:1990540,c:['#a855f7','#d946ef']},
+        {id:'o5',nm:'노라엘',gp:'ECLIPSE',bday:'10월 27일',bio:'무대 장악력의 래퍼',votes:1510222,c:['#f59e0b','#fbbf24']},
+      ]},
+    '11':{label:'11월',sub:'생일 라운드',status:'soon',statusTxt:'오픈 예정',dday:'예정',
+      timeline:[['투표 진행','9/1–10/15',false],['1위 발표','10/15',false],['생일 광고','11월',false]],
+      idols:[
+        {id:'n1',nm:'정시온',gp:'ECLIPSE',bday:'11월 8일',bio:'팀의 든든한 맏형',votes:2700610,c:['#8b5cf6','#6366f1']},
+        {id:'n2',nm:'오하진',gp:'VELLO',bday:'11월 22일',bio:'반전 매력의 메인댄서',votes:2480330,c:['#ec4899','#f43f5e']},
+        {id:'n3',nm:'류세아',gp:'LUMINA',bday:'11월 15일',bio:'청아한 음색의 보컬',votes:2120770,c:['#14b8a6','#06b6d4']},
+        {id:'n4',nm:'권아린',gp:'NOVA',bday:'11월 4일',bio:'사랑스러운 비타민',votes:1820005,c:['#f59e0b','#ef4444']},
+        {id:'n5',nm:'남도현',gp:'VELLO',bday:'11월 30일',bio:'시크한 비주얼 래퍼',votes:1460880,c:['#a855f7','#ec4899']},
+      ]},
+  };
+
+  let balance=0, active='9', screen='rank';
+  let myBias=null, biasPhoto=null, nickname='아미보라', attClaimed=false;
+  const myVotes={};
+
+  const $=s=>document.querySelector(s);
+  const $$=s=>Array.from(document.querySelectorAll(s));
+  const phoneEl=$('.phone'), balEl=$('#bal'), balValEl=$('#balVal');
+  let rowEls=new Map();
+
+  const fmt=n=>n.toLocaleString();
+  const initial=n=>(n||'?').trim().charAt(0);
+  function allIdols(){let a=[];Object.keys(rounds).forEach(k=>rounds[k].idols.forEach(d=>a.push(Object.assign({round:k},d))));return a;}
+  function findIdol(id){for(const k in rounds){const d=rounds[k].idols.find(x=>x.id===id);if(d)return{idol:d,round:k};}return null;}
+  function rankOf(id){const f=findIdol(id);if(!f)return '-';const s=[...rounds[f.round].idols].sort((a,b)=>b.votes-a.votes);return (s.findIndex(x=>x.id===id)+1)+'위';}
+
+  function renderBalance(){balValEl.textContent=fmt(balance);const mp=$('#mePick');if(mp)mp.textContent=fmt(balance)+' 픽';}
+
+  /* ---------- 랭킹 ---------- */
+  function buildTabs(){
+    const t=$('#tabs');t.innerHTML='';
+    Object.keys(rounds).forEach(k=>{
+      const r=rounds[k],b=document.createElement('button');
+      b.className='tab'+(k===active?' active':'');
+      b.innerHTML=`${r.label}<span class="sub">${r.sub}</span>`;
+      b.onclick=()=>{active=k;buildTabs();buildRoundHead();buildList();};
+      t.appendChild(b);
+    });
+  }
+  function buildRoundHead(){
+    const r=rounds[active];
+    const tl=r.timeline.map((p,i)=>`<div class="ph ${p[2]?'on':''}"><span class="t">${p[0]}</span><span class="d">${p[1]}</span></div>${i<2?'<span class="ph-ar">→</span>':''}`).join('');
+    $('#roundHead').innerHTML=`<div class="status-row"><span class="chip ${r.status==='live'?'live':'soon'}">${r.status==='live'?'● ':''}${r.statusTxt}</span><span style="font-size:11px;color:var(--mute)">${r.label} 생일자 응원</span><span class="dday">${r.dday}</span></div><div class="timeline">${tl}</div>`;
+  }
+  function buildList(){
+    const listEl=$('#list');listEl.innerHTML='';rowEls=new Map();
+    rounds[active].idols.forEach(d=>{
+      const row=document.createElement('div');row.className='row';row.dataset.id=d.id;
+      const bg=d.id===myBias&&biasPhoto?`background-image:url(${biasPhoto})`:`background:linear-gradient(135deg,${d.c[0]},${d.c[1]})`;
+      row.innerHTML=`<div class="rank"></div><div class="avatar" style="${bg}">${(d.id===myBias&&biasPhoto)?'':initial(d.nm)}</div>
+        <div class="who"><div class="nm">${d.nm}<span class="crown">👑</span></div><div class="gp">${d.gp}</div><div class="mine"></div></div>
+        <div class="votes"><span class="n">${fmt(d.votes)}</span> <span class="u">표</span></div>
+        <button class="heart-btn">💗 응원</button>`;
+      row.querySelector('.heart-btn').onclick=()=>openVote(d.id);
+      const mv=myVotes[d.id];if(mv){const m=row.querySelector('.mine');m.style.display='block';m.textContent='내가 준 표 '+fmt(mv);}
+      listEl.appendChild(row);rowEls.set(d.id,row);
+    });
+    reorder(true);
+  }
+  function reorder(instant){
+    const listEl=$('#list');
+    const firsts=new Map();
+    if(!instant&&!reduce)rowEls.forEach((el,id)=>firsts.set(id,el.getBoundingClientRect().top));
+    const sorted=[...rounds[active].idols].sort((a,b)=>b.votes-a.votes);
+    sorted.forEach(d=>listEl.appendChild(rowEls.get(d.id)));
+    sorted.forEach((d,i)=>{const el=rowEls.get(d.id);el.querySelector('.rank').textContent=i+1;el.classList.toggle('top',i===0);});
+    const lead=sorted[0];
+    $('#prizeTag').innerHTML=`🎁 ${rounds[active].label} 1위 <b>${lead.nm}</b> · 이대로면 <b>생일 전광판 광고</b> 주인공!`;
+    if(instant||reduce)return;
+    rowEls.forEach((el,id)=>{const dy=(firsts.get(id)||0)-el.getBoundingClientRect().top;if(!dy)return;el.style.transform=`translateY(${dy}px)`;el.style.transition='none';requestAnimationFrame(()=>{el.style.transition='transform .42s cubic-bezier(.2,.8,.2,1)';el.style.transform='';});});
+  }
+  function bumpNum(id,gold){const el=rowEls.get(id);if(!el)return;el.querySelector('.votes .n').textContent=fmt(findIdol(id).idol.votes);if(gold){const n=el.querySelector('.votes .n');n.classList.remove('tick');void n.offsetWidth;n.classList.add('tick');}}
+
+  /* ---------- 응원(투표) 시트 ---------- */
+  const voteScrim=$('#voteScrim');
+  function openVote(id){
+    const d=findIdol(id).idol;
+    const opts=VOTE_OPTS.map(o=>{const dis=balance<o.p?'disabled':'';const best=o.v===10?'best':'';
+      return `<div class="opt ${dis} ${best}" data-id="${id}" data-v="${o.v}" data-p="${o.p}"><div class="ov">${o.v}표<span class="ovs">${best?'추천':''}</span></div><div class="op">${fmt(o.p)} <small>픽</small></div></div>`;}).join('');
+    $('#voteSheet').innerHTML=`<h3>${d.nm} 응원하기</h3><p>한 번에 여러 표를 몰아줄 수 있어요 · 보유 ${fmt(balance)}픽</p>${opts}<button class="opt-close" id="voteClose">닫기</button>`;
+    $('#voteSheet').querySelectorAll('.opt:not(.disabled)').forEach(el=>{
+      el.onclick=()=>applyVote(el.dataset.id,+el.dataset.v,+el.dataset.p);
+    });
+    $('#voteClose').onclick=closeVote;
+    voteScrim.classList.add('show');
+  }
+  function closeVote(){voteScrim.classList.remove('show');}
+  voteScrim.onclick=e=>{if(e.target===voteScrim)closeVote();};
+  function applyVote(id,v,p){
+    if(balance<p){closeVote();lackFx();return;}
+    balance-=p;renderBalance();
+    const d=findIdol(id).idol;d.votes+=v;myVotes[id]=(myVotes[id]||0)+v;
+    closeVote();
+    if(screen==='rank'){
+      const row=rowEls.get(id);
+      if(row){const m=row.querySelector('.mine');m.style.display='block';m.textContent='내가 준 표 '+fmt(myVotes[id]);}
+      bumpNum(id,true);reorder(false);
+    }
+    updateMe();
+    toast(`💗 ${d.nm}에게 ${v}표 응원 완료!`);
+  }
+  function lackFx(){balEl.classList.remove('lack');void balEl.offsetWidth;balEl.classList.add('lack');toast('픽이 부족해요 — 픽 모으기에서 충전하세요!');}
+
+  /* 실시간 다른 팬 투표 시뮬 */
+  setInterval(()=>{
+    if(screen!=='rank')return;
+    if($('#adScrim').classList.contains('show')||voteScrim.classList.contains('show'))return;
+    const arr=rounds[active].idols,d=arr[Math.floor(Math.random()*arr.length)];
+    d.votes+=Math.floor(120+Math.random()*2600);bumpNum(d.id,false);reorder(false);
+  },reduce?4000:1600);
+
+  /* ---------- 마이최애 ---------- */
+  function buildBias(){
+    const b=$('#biasBody');
+    if(!myBias){
+      const grid=allIdols().map(d=>`<div class="pick" data-id="${d.id}"><div class="pa" style="background:linear-gradient(135deg,${d.c[0]},${d.c[1]})">${initial(d.nm)}</div><div><div class="pn">${d.nm}</div><div class="pg">${d.gp} · ${d.bday}</div></div></div>`).join('');
+      b.innerHTML=`<div class="card soft"><div class="card-d" style="margin:0">아래에서 최애를 선택하면 프로필이 만들어지고, 사진도 직접 설정할 수 있어요.</div></div><div class="pick-grid">${grid}</div>`;
+      b.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{myBias=el.dataset.id;buildBias();updateMe();});
+      return;
+    }
+    const d=findIdol(myBias).idol;
+    const photo=biasPhoto?`background-image:url(${biasPhoto})`:'';
+    b.innerHTML=`
+      <div class="bias-hero">
+        <div class="bphoto" style="${photo}">${biasPhoto?'':initial(d.nm)}</div>
+        <div class="bnm">${d.nm}</div>
+        <div class="bgp">${d.gp}</div>
+        <div class="brow"><span class="pillinfo">🎂 ${d.bday}</span><span class="pillinfo">🏆 ${rankOf(d.id)}</span><span class="pillinfo">💗 내 표 ${fmt(myVotes[d.id]||0)}</span></div>
+        <div style="font-size:12px;opacity:.95;margin-top:10px;line-height:1.5">${d.bio}</div>
+        <div class="bbtns">
+          <button class="bbtn" id="photoBtn">사진 설정</button>
+          <button class="bbtn outline" id="changeBtn">최애 변경</button>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" />
+      </div>
+      <button class="cta" id="goVote">${d.label||rounds[findIdol(d.id).round].label} 라운드에서 ${d.nm} 응원하기</button>`;
+    $('#photoBtn').onclick=()=>$('#photoInput').click();
+    $('#photoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;if(biasPhoto)URL.revokeObjectURL(biasPhoto);biasPhoto=URL.createObjectURL(f);buildBias();toast('최애 사진이 설정됐어요 💗');};
+    $('#changeBtn').onclick=()=>{myBias=null;if(biasPhoto){URL.revokeObjectURL(biasPhoto);biasPhoto=null;}buildBias();};
+    $('#goVote').onclick=()=>{active=findIdol(myBias).round;go('rank');buildTabs();buildRoundHead();buildList();setTimeout(()=>openVote(myBias),250);};
+  }
+
+  /* ---------- 픽 모으기 ---------- */
+  $('#attBtn').onclick=function(){
+    if(attClaimed){return;}
+    attClaimed=true;balance+=ATT_REWARD;renderBalance();
+    this.disabled=true;this.textContent='오늘 출석 완료! 내일 또 오세요';
+    balEl.classList.remove('bump');void balEl.offsetWidth;balEl.classList.add('bump');
+    toast('💗 +1,000픽 출석 적립!');
+  };
+  $('#adEarnBtn').onclick=openAd;
+  $('#adBannerBtn').onclick=openAd;
+  $$('.mission').forEach(m=>m.onclick=()=>toast('오퍼월 연동 예정 — 앱 출시 후 열려요'));
+
+  /* ---------- 픽 충전 ---------- */
+  const PACKS=[
+    {emoji:'🌱',nm:'스타터',price:1200,picks:16000,bonus:0},
+    {emoji:'💗',nm:'베이직',price:3300,picks:46000,bonus:8},
+    {emoji:'💖',nm:'플러스',price:5500,picks:82000,bonus:17},
+    {emoji:'⭐',nm:'인기',price:11000,picks:180000,bonus:25,rec:true},
+    {emoji:'🔥',nm:'파워',price:22000,picks:380000,bonus:33},
+    {emoji:'💎',nm:'메가',price:55000,picks:1000000,bonus:42},
+    {emoji:'👑',nm:'얼티밋',price:110000,picks:2150000,bonus:50},
+  ];
+  const chargeScrim=$('#chargeScrim');
+  $('#chargeBtn').onclick=openCharge;
+  chargeScrim.onclick=e=>{if(e.target===chargeScrim)chargeScrim.classList.remove('show');};
+  function openCharge(){
+    const rows=PACKS.map((p,i)=>`<div class="pack ${p.rec?'rec':''}" data-i="${i}">${p.rec?'<span class="precbadge">⭐ 추천</span>':''}<span class="pemoji">${p.emoji}</span><div class="pinfo"><div><span class="ppicks">${fmt(p.picks)}픽</span><span class="pbonus ${p.bonus===0?'zero':''}">${p.bonus===0?'기본':'+'+p.bonus+'%'}</span></div><div class="pvotes">≈ ${fmt(Math.floor(p.picks/500))}표 응원 가능</div></div><div class="pprice">${fmt(p.price)}원</div></div>`).join('');
+    $('#chargeSheet').innerHTML=`<h3>픽 충전하기 💎</h3><p>큰 패키지일수록 보너스가 커져요 · 보유 ${fmt(balance)}픽</p>${rows}<button class="opt-close" id="chargeClose">닫기</button><p style="text-align:center;font-size:10.5px;color:var(--mute);margin:11px 0 0;line-height:1.5">＊ 데모예요. 실제 결제는 앱 출시 후 스토어 결제에 연결돼요.</p>`;
+    $('#chargeSheet').querySelectorAll('.pack').forEach(el=>el.onclick=()=>buyPack(+el.dataset.i));
+    $('#chargeClose').onclick=()=>chargeScrim.classList.remove('show');
+    chargeScrim.classList.add('show');
+  }
+  function buyPack(i){
+    const p=PACKS[i];balance+=p.picks;renderBalance();updateMe();
+    chargeScrim.classList.remove('show');
+    balEl.classList.remove('bump');void balEl.offsetWidth;balEl.classList.add('bump');
+    toast(`💎 ${fmt(p.picks)}픽 충전 완료!`);
+  }
+
+  /* ---------- 내정보 ---------- */
+  function updateMe(){
+    $('#mePick').textContent=fmt(balance)+' 픽';
+    $('#meHello').textContent=nickname+' 님';
+    $('#meBias').textContent=myBias?findIdol(myBias).idol.nm+' ('+findIdol(myBias).idol.gp+')':'아직 선택 안 함';
+    const total=Object.values(myVotes).reduce((a,b)=>a+b,0);
+    $('#meVotes').textContent=fmt(total)+'표';
+  }
+  $('#nickSave').onclick=()=>{const v=$('#nickInput').value.trim()||'아미보라';nickname=v;updateMe();toast('닉네임이 저장됐어요');};
+  $('#logoutBtn').onclick=()=>toast('데모에서는 로그아웃이 동작하지 않아요');
+
+  /* ---------- ad modal ---------- */
+  const adScrim=$('#adScrim'),adFill=$('#adFill'),adCount=$('#adCount'),adDone=$('#adDone'),adTitle=$('#adTitle'),adSub=$('#adSub');
+  let adTimer=null;
+  adDone.onclick=finishAd;
+  function openAd(){
+    adScrim.classList.add('show');adTitle.textContent='광고 시청 중…';adSub.textContent='끝까지 보면 10,000픽이 적립돼요';adDone.style.display='none';adFill.style.width='0%';
+    const total=reduce?300:3000,start=performance.now();cancelAnimationFrame(adTimer);
+    (function frame(now){const p=Math.min(1,(now-start)/total);adFill.style.width=(p*100)+'%';adCount.textContent=Math.ceil((1-p)*(total/1000))+'초';
+      if(p<1)adTimer=requestAnimationFrame(frame);else{adTitle.textContent='시청 완료!';adSub.textContent='픽을 받아가세요';adCount.textContent='0초';adDone.style.display='inline-block';}})(start);
+  }
+  function finishAd(){adScrim.classList.remove('show');balance+=AD_REWARD;renderBalance();balEl.classList.remove('bump');void balEl.offsetWidth;balEl.classList.add('bump');toast('💗 +10,000픽 적립!');}
+
+  /* ---------- nav ---------- */
+  function go(sc){
+    screen=sc;
+    $$('.screen').forEach(s=>s.classList.remove('on'));
+    $('#sc-'+sc).classList.add('on');
+    $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.sc===sc));
+    $('.content').scrollTop=0;
+    if(sc==='bias')buildBias();
+    if(sc==='me')updateMe();
+  }
+  $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.sc));
+
+  /* ---------- toast / floaty ---------- */
+  let toastT=null;
+  function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1900);}
+
+  buildTabs();buildRoundHead();buildList();renderBalance();updateMe();
+})();
+</script>
+</body>
+</html>
